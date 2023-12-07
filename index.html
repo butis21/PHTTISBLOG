@@ -1,136 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PHTTISBLOG</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 20px;
-    }
-
-    table, th, td {
-      border: 1px solid #ddd;
-    }
-
-    th, td {
-      padding: 10px;
-      text-align: left;
-    }
-
-    #overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
-      justify-content: center;
-      align-items: center;
-      z-index: 2;
-    }
-
-    #popup {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-    }
-  </style>
-</head>
-<body>
-
-<table id="postsTable">
-  <!-- Table rows will be added dynamically using JavaScript -->
-</table>
-
-<button onclick="showPopup()">Добавить пост</button>
-
-<div id="overlay">
-  <div id="popup">
-    <label for="name">Имя:</label>
-    <input type="text" id="name" required><br>
-
-    <label for="post">Текст поста:</label>
-    <textarea id="post" rows="4" required></textarea><br>
-
-    <button onclick="savePost()">Отправить</button>
-    <button onclick="hidePopup()">Отмена</button>
-  </div>
-</div>
 <script>
-    document.addEventListener("DOMContentLoaded", loadPosts);
-  
-    function loadPosts() {
-      // Fetch posts from the server or local storage
-      // Example: const posts = fetchPostsFromServer();
-      fetch("https://raw.githubusercontent.com/butis21/PHTTISBLOG/main/posts.txt")
-        .then(response => response.text())
-        .then(data => {
-          const posts = data.split('\n').filter(Boolean).map(line => {
-            const [name, text, time] = line.split('/');
-            return { name, text, time };
-          });
-  
-          const table = document.getElementById("postsTable");
-          table.innerHTML = ""; // Clear existing rows
-  
-          posts.forEach((post, index) => {
-            const row = table.insertRow();
-            const cell1 = row.insertCell(0);
-            const cell2 = row.insertCell(1);
-            const cell3 = row.insertCell(2);
-  
-            cell1.textContent = index + 1;
-            cell2.textContent = post.name;
-            cell3.textContent = post.text;
-          });
-        });
-    }
-  
-    function showPopup() {
-      document.getElementById("overlay").style.display = "flex";
-    }
-  
-    function hidePopup() {
-      document.getElementById("overlay").style.display = "none";
-    }
-  
-    function savePost() {
-      const name = document.getElementById("name").value;
-      const postText = document.getElementById("post").value;
-  
-      if (name && postText) {
-        const time = new Date().toLocaleString();
-        const postLine = `${name}/${postText}/${time}\n`;
-  
-        // Save post to the server or local storage
-        // Example: savePostToServer(postLine);
-        fetch("https://raw.githubusercontent.com/butis21/PHTTISBLOG/main/posts.txt", {
-          method: "POST",
-          body: postLine,
-          headers: {
-            "Content-Type": "text/plain",
-            Authorization: "token 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",
-          },
-        })
-          .then(response => response.text())
-          .then(() => {
-            hidePopup();
-            loadPosts(); // Refresh the table
-          })
-          .catch(error => console.error("Error saving post:", error));
-      } else {
-        alert("Имя и текст поста не могут быть пустыми!");
-      }
-    }
-  </script>
+  document.addEventListener("DOMContentLoaded", loadPosts);
 
-</body>
-</html>
+  function loadPosts() {
+    // Fetch posts from the server or local storage
+    // Example: const posts = fetchPostsFromServer();
+    fetch("https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt")
+      .then(response => response.json())
+      .then(data => {
+        const posts = atob(data.content).split('\n').filter(Boolean).map(line => {
+          const [name, text, time] = line.split('/');
+          return { name, text, time };
+        });
+
+        const table = document.getElementById("postsTable");
+        table.innerHTML = ""; // Clear existing rows
+
+        posts.forEach((post, index) => {
+          const row = table.insertRow();
+          const cell1 = row.insertCell(0);
+          const cell2 = row.insertCell(1);
+          const cell3 = row.insertCell(2);
+
+          cell1.textContent = index + 1;
+          cell2.textContent = post.name;
+          cell3.textContent = post.text;
+        });
+      });
+  }
+
+  function showPopup() {
+    document.getElementById("overlay").style.display = "flex";
+  }
+
+  function hidePopup() {
+    document.getElementById("overlay").style.display = "none";
+  }
+
+  function savePost() {
+    const name = document.getElementById("name").value;
+    const postText = document.getElementById("post").value;
+
+    if (name && postText) {
+      const time = new Date().toLocaleString();
+      const postLine = `${name}/${postText}/${time}\n`;
+
+      // Save post to the server or local storage
+      // Example: savePostToServer(postLine);
+      fetch("https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt", {
+        method: "PUT",
+        headers: {
+          "Authorization": "token <ваш_токен>",
+          "Accept": "application/vnd.github.v3+json",
+        },
+        body: JSON.stringify({
+          message: "Add new post",
+          content: btoa(postLine),
+          sha: data.sha, // Use the sha from the response of previous fetch
+        }),
+      })
+        .then(response => response.json())
+        .then(() => {
+          hidePopup();
+          loadPosts(); // Refresh the table
+        })
+        .catch(error => console.error("Error saving post:", error));
+    } else {
+      alert("Имя и текст поста не могут быть пустыми!");
+    }
+  }
+</script>
