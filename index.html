@@ -103,37 +103,50 @@
   }
 
   function savePost() {
-    const name = document.getElementById("name").value;
-    const postText = document.getElementById("post").value;
+  const name = document.getElementById("name").value;
+  const postText = document.getElementById("post").value;
 
-    if (name && postText) {
-      const time = new Date().toLocaleString();
-      const postLine = `${name}/${postText}/${time}\n`;
+  if (name && postText) {
+    const time = new Date().toLocaleString();
+    const postLine = `${name}/${postText}/${time}\n`;
 
-      // Save post to the server or local storage
-      // Example: savePostToServer(postLine);
-      fetch("https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt", {
-        method: "PUT",
-        headers: {
-          "Authorization": "token <ваш_токен>",
-          "Accept": "application/vnd.github.v3+json",
-        },
-        body: JSON.stringify({
-          message: "Add new post",
-          content: btoa(postLine),
-          sha: data.sha, // Use the sha from the response of previous fetch
-        }),
-      })
-        .then(response => response.json())
-        .then(() => {
-          hidePopup();
-          loadPosts(); // Refresh the table
+    // Fetch the current file content to get the sha
+    fetch("https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt", {
+      headers: {
+        "Authorization": "token <ваш_токен>",
+        "Accept": "application/vnd.github.v3+json",
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        // Use the sha from the response
+        const sha = data.sha;
+
+        // Save post to the server or local storage
+        fetch("https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt", {
+          method: "PUT",
+          headers: {
+            "Authorization": "token <ваш_токен>",
+            "Accept": "application/vnd.github.v3+json",
+          },
+          body: JSON.stringify({
+            message: "Add new post",
+            content: btoa(postLine),
+            sha: sha,
+          }),
         })
-        .catch(error => console.error("Error saving post:", error));
-    } else {
-      alert("Имя и текст поста не могут быть пустыми!");
-    }
+          .then(response => response.json())
+          .then(() => {
+            hidePopup();
+            loadPosts(); // Refresh the table
+          })
+          .catch(error => console.error("Error saving post:", error));
+      })
+      .catch(error => console.error("Error fetching file content:", error));
+  } else {
+    alert("Имя и текст поста не могут быть пустыми!");
   }
+}
 </script>
 
 </body>
