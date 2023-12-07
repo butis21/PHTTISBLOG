@@ -112,8 +112,9 @@
 
     // Fetch the current file content to get the sha
     fetch("https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt", {
+      method: "GET",
       headers: {
-        "Authorization": "token " + encodeURIComponent("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"),
+        "Authorization": "token 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",
         "Accept": "application/vnd.github.v3+json",
       },
     })
@@ -131,7 +132,7 @@
         fetch("https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt", {
           method: "PUT",
           headers: {
-            "Authorization": "token " + encodeURIComponent("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"),
+            "Authorization": "token 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",
             "Accept": "application/vnd.github.v3+json",
           },
           body: JSON.stringify({
