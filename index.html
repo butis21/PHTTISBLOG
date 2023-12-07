@@ -1,172 +1,178 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PHTTISBLOG</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHTTISBLOG</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
 
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-top: 20px;
-    }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
 
-    table, th, td {
-      border: 1px solid #ddd;
-    }
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
 
-    th, td {
-      padding: 10px;
-      text-align: left;
-    }
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
 
-    #overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
-      justify-content: center;
-      align-items: center;
-      z-index: 2;
-    }
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
 
-    #popup {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-    }
-  </style>
+        #popup {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+    </style>
 </head>
+
 <body>
 
-<table id="postsTable">
-  <!-- Table rows will be added dynamically using JavaScript -->
-</table>
+    <table id="postsTable">
+        <!-- Table rows will be added dynamically using JavaScript -->
+    </table>
 
-<button onclick="showPopup()">Добавить пост</button>
+    <button onclick="showPopup()">Добавить пост</button>
 
-<div id="overlay">
-  <div id="popup">
-    <label for="name">Имя:</label>
-    <input type="text" id="name" required><br>
+    <div id="overlay">
+        <div id="popup">
+            <label for="name">Имя:</label>
+            <input type="text" id="name" required><br>
 
-    <label for="post">Текст поста:</label>
-    <textarea id="post" rows="4" required></textarea><br>
+            <label for="post">Текст поста:</label>
+            <textarea id="post" rows="4" required></textarea><br>
 
-    <button onclick="savePost()">Отправить</button>
-    <button onclick="hidePopup()">Отмена</button>
-  </div>
-</div>
-<script>
-  document.addEventListener("DOMContentLoaded", loadPosts);
+            <button onclick="savePost()">Отправить</button>
+            <button onclick="hidePopup()">Отмена</button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", loadPosts);
 
-  function loadPosts() {
-    // Fetch posts from the server or local storage
-    // Example: const posts = fetchPostsFromServer();
-    fetch("https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt")
-      .then(response => response.json())
-      .then(data => {
-        const posts = atob(data.content).split('\n').filter(Boolean).map(line => {
-          const [name, text, time] = line.split('/');
-          return { name, text, time };
-        });
-
-        const table = document.getElementById("postsTable");
-        table.innerHTML = ""; // Clear existing rows
-
-        posts.forEach((post, index) => {
-          const row = table.insertRow();
-          const cell1 = row.insertCell(0);
-          const cell2 = row.insertCell(1);
-          const cell3 = row.insertCell(2);
-
-          cell1.textContent = index + 1;
-          cell2.textContent = post.name;
-          cell3.textContent = post.text;
-        });
-      });
-  }
-
-  function showPopup() {
-    document.getElementById("overlay").style.display = "flex";
-  }
-
-  function hidePopup() {
-    document.getElementById("overlay").style.display = "none";
-  }
-
-  function savePost() {
-  const name = document.getElementById("name").value;
-  const postText = document.getElementById("post").value;
-
-  if (name && postText) {
-    const time = new Date().toLocaleString();
-    const newData = `${name}/${postText}/${time}\n`;
-
-    // Fetch the current file content to get the sha
-    fetch('https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt')
-            .then(response => response.json())
-            .then(data => {
-                // Декодирование содержимого из base64
-                const decodedContent = new TextDecoder().decode(base64ToArrayBuffer(data.content));
-
-                // Обновление файла
-                const updatedData = decodedContent + newData;
-
-                // Кодирование обновленных данных в base64
-                const updatedContentBase64 = arrayBufferToBase64(new TextEncoder().encode(updatedData));
-
-                // Отправка обновленных данных обратно на сервер
-                fetch('https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt', {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': 'Bearer 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', // Замените на свой токен
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: 'Update posts.txt',
-                        content: updatedContentBase64,
-                        sha: data.sha
-                    })
-                })
+        function loadPosts() {
+            // Fetch posts from the server or local storage
+            // Example: const posts = fetchPostsFromServer();
+            fetch("https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt")
                 .then(response => response.json())
-                .then(data => console.log('File updated:', data))
-                .catch(error => console.error('Error updating file:', error));
-            })
-            .catch(error => console.error('Error fetching current data:', error));
+                .then(data => {
+                    const posts = atob(data.content).split('\n').filter(Boolean).map(line => {
+                        const [name, text, time] = line.split('/');
+                        return { name, text, time };
+                    });
 
-    // Вспомогательные функции
-    function base64ToArrayBuffer(base64) {
-        const binaryString = window.atob(base64);
-        const len = binaryString.length;
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-        }
-        return bytes.buffer;
-    }
+                    const table = document.getElementById("postsTable");
+                    table.innerHTML = ""; // Clear existing rows
 
-    function arrayBufferToBase64(buffer) {
-        let binary = '';
-        const bytes = new Uint8Array(buffer);
-        const len = bytes.byteLength;
-        for (let i = 0; i < len; i++) {
-            binary += String.fromCharCode(bytes[i]);
+                    posts.forEach((post, index) => {
+                        const row = table.insertRow();
+                        const cell1 = row.insertCell(0);
+                        const cell2 = row.insertCell(1);
+                        const cell3 = row.insertCell(2);
+
+                        cell1.textContent = index + 1;
+                        cell2.textContent = post.name;
+                        cell3.textContent = post.text;
+                    });
+                });
         }
-        return window.btoa(binary);
-    }
-  } else {
-    alert("Имя и текст поста не могут быть пустыми!");
-  }
-}
-</script>
+
+        function showPopup() {
+            document.getElementById("overlay").style.display = "flex";
+        }
+
+        function hidePopup() {
+            document.getElementById("overlay").style.display = "none";
+        }
+
+        function savePost() {
+            const name = document.getElementById("name").value;
+            const postText = document.getElementById("post").value;
+
+            if (name && postText) {
+                const time = new Date().toLocaleString();
+                const newData = `${name}/${postText}/${time}\n`;
+
+                // Fetch the current file content to get the sha
+                fetch('https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Декодирование содержимого из base64
+                        const decodedContent = new TextDecoder().decode(base64ToArrayBuffer(data.content));
+
+                        // Обновление файла
+                        const updatedData = decodedContent + newData;
+
+                        // Кодирование обновленных данных в base64
+                        const updatedContentBase64 = arrayBufferToBase64(new TextEncoder().encode(updatedData));
+
+                        // Отправка обновленных данных обратно на сервер
+                        fetch('https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt', {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': 'Bearer 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',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                message: 'Update posts.txt',
+                                content: updatedContentBase64,
+                                sha: data.sha
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => console.log('File updated:', data))
+                            .catch(error => console.error('Error updating file:', error));
+                    })
+                    .catch(error => console.error('Error fetching current data:', error));
+
+                // Вспомогательные функции
+                function base64ToArrayBuffer(base64) {
+                    const binaryString = window.atob(base64);
+                    const len = binaryString.length;
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    return bytes.buffer;
+                }
+
+                function arrayBufferToBase64(buffer) {
+                    let binary = '';
+                    const bytes = new Uint8Array(buffer);
+                    const len = bytes.byteLength;
+                    for (let i = 0; i < len; i++) {
+                        binary += String.fromCharCode(bytes[i]);
+                    }
+                    return window.btoa(binary);
+                }
+            } else {
+                alert("Имя и текст поста не могут быть пустыми!");
+            }
+        }
+    </script>
 
 </body>
+
 </html>
