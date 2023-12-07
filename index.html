@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сайт с таблицей</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ccc;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        #popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <button id="openPopup" style="position: fixed; top: 10px; right: 10px;">Добавить пост</button>
+
+    <table id="postsTable">
+        <!-- Таблица будет добавлена динамически с помощью JavaScript -->
+    </table>
+
+    <div id="overlay"></div>
+    <div id="popup">
+        <label for="name">Имя:</label>
+        <input type="text" id="name">
+        <br>
+        <label for="post">Текст поста:</label>
+        <textarea id="post"></textarea>
+        <br>
+        <button id="submitPost">Отправить</button>
+        <button id="closePopup">Закрыть</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            updateTable();
+
+            document.getElementById('openPopup').addEventListener('click', function () {
+                document.getElementById('overlay').style.display = 'block';
+                document.getElementById('popup').style.display = 'block';
+            });
+
+            document.getElementById('closePopup').addEventListener('click', function () {
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById('popup').style.display = 'none';
+            });
+
+            document.getElementById('submitPost').addEventListener('click', function () {
+                var name = document.getElementById('name').value;
+                var post = document.getElementById('post').value;
+
+                if (name.trim() === '' || post.trim() === '') {
+                    alert('Заполните все поля');
+                    return;
+                }
+
+                var currentTime = new Date();
+                var dateString = currentTime.toLocaleString();
+                var postString = `${name}/${post}/${dateString}\n`;
+
+                savePost(postString);
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById('popup').style.display = 'none';
+
+                updateTable();
+            });
+        });
+
+        function savePost(postString) {
+            // Replace 'YOUR_GITHUB_TOKEN', 'YOUR_REPO_OWNER', 'YOUR_REPO_NAME' with your actual values
+            const token = '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';
+            const repoOwner = 'butis21';
+            const repoName = 'PHTTISBLOG';
+            const filePath = 'posts.txt';
+
+            const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const content = atob(data.content || '');
+                    const updatedContent = content + postString;
+                    const encodedContent = btoa(updatedContent);
+
+                    // Update the file content
+                    return fetch(url, {
+                        method: 'PUT',
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: 'Update posts.txt',
+                            content: encodedContent,
+                            sha: data.sha
+                        })
+                    });
+                })
+                .then(response => response.json())
+                .then(data => console.log('File updated:', data))
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateTable() {
+            // Replace 'YOUR_GITHUB_TOKEN', 'YOUR_REPO_OWNER', 'YOUR_REPO_NAME' with your actual values
+            const token = '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';
+            const repoOwner = 'butis21';
+            const repoName = 'PHTTISBLOG';
+            const filePath = 'posts.txt';
+
+            const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const content = atob(data.content || '');
+                    populateTable(content);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function populateTable(data) {
+            var table = document.getElementById('postsTable');
+            table.innerHTML = '';
+
+            var lines = data.split('\n');
+
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i].trim();
+                if (line !== '') {
+                    var parts = line.split('/');
+                    var row = table.insertRow(-1);
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    var cell3 = row.insertCell(2);
+                    cell1.textContent = i + 1;
+                    cell2.textContent = parts[0];
+                    cell3.textContent = parts[1];
+                }
+            }
+        }
+    </script>
+
+</body>
+
+</html>
