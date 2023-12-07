@@ -108,47 +108,60 @@
 
   if (name && postText) {
     const time = new Date().toLocaleString();
-    const postLine = `${name}/${postText}/${time}\n`;
+    const newData = `${name}/${postText}/${time}\n`;
 
     // Fetch the current file content to get the sha
-    fetch("https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt", {
-      method: "GET",
-      headers: {
-        "Authorization": "token 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",
-        "Accept": "application/vnd.github.v3+json",
-      },
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        // Use the sha from the response
-        const sha = data.sha;
+    fetch('https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt')
+            .then(response => response.json())
+            .then(data => {
+                // Декодирование содержимого из base64
+                const decodedContent = new TextDecoder().decode(base64ToArrayBuffer(data.content));
 
-        // Save post to the server or local storage
-        fetch("https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt", {
-          method: "PUT",
-          headers: {
-            "Authorization": "token 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",
-            "Accept": "application/vnd.github.v3+json",
-          },
-          body: JSON.stringify({
-            message: "Add new post",
-            content: btoa(unescape(encodeURIComponent(postLine))),
-            sha: sha,
-          }),
-        })
-          .then(response => response.json())
-          .then(() => {
-            hidePopup();
-            loadPosts(); // Refresh the table
-          })
-          .catch(error => console.error("Error saving post:", error));
-      })
-      .catch(error => console.error("Error fetching file content:", error));
+                // Обновление файла
+                const updatedData = decodedContent + newData;
+
+                // Кодирование обновленных данных в base64
+                const updatedContentBase64 = arrayBufferToBase64(new TextEncoder().encode(updatedData));
+
+                // Отправка обновленных данных обратно на сервер
+                fetch('https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer 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', // Замените на свой токен
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Update posts.txt',
+                        content: updatedContentBase64,
+                        sha: data.sha
+                    })
+                })
+                .then(response => response.json())
+                .then(data => console.log('File updated:', data))
+                .catch(error => console.error('Error updating file:', error));
+            })
+            .catch(error => console.error('Error fetching current data:', error));
+
+    // Вспомогательные функции
+    function base64ToArrayBuffer(base64) {
+        const binaryString = window.atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes.buffer;
+    }
+
+    function arrayBufferToBase64(buffer) {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
+    }
   } else {
     alert("Имя и текст поста не могут быть пустыми!");
   }
