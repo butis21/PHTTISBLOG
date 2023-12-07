@@ -72,7 +72,7 @@
     // Example: const posts = fetchPostsFromServer();
     fetch("https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt")
       .then(response => response.json())
-      .then(error => console.log(error)
+      .then(error => console.log(error))
       .then(data => {
         const posts = atob(data.content).split('\n').filter(Boolean).map(line => {
           const [name, text, time] = line.split('/');
@@ -119,7 +119,7 @@
         "Accept": "application/vnd.github.v3+json",
       },
     })
-      .then(error => console.log(error)
+      .then(error => console.log(error))
       .then(response => {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
