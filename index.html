@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,7 +72,6 @@
     // Example: const posts = fetchPostsFromServer();
     fetch("https://api.github.com/repos/butis21/PHTTISBLOG/contents/posts.txt")
       .then(response => response.json())
-      .then(error => console.log(error))
       .then(data => {
         const posts = atob(data.content).split('\n').filter(Boolean).map(line => {
           const [name, text, time] = line.split('/');
@@ -119,7 +118,6 @@
         "Accept": "application/vnd.github.v3+json",
       },
     })
-      .then(error => console.log(error))
       .then(response => {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
