@@ -1,3 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PHTTISBLOG</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+
+    #popup {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<table id="postsTable">
+  <!-- Table rows will be added dynamically using JavaScript -->
+</table>
+
+<button onclick="showPopup()">Добавить пост</button>
+
+<div id="overlay">
+  <div id="popup">
+    <label for="name">Имя:</label>
+    <input type="text" id="name" required><br>
+
+    <label for="post">Текст поста:</label>
+    <textarea id="post" rows="4" required></textarea><br>
+
+    <button onclick="savePost()">Отправить</button>
+    <button onclick="hidePopup()">Отмена</button>
+  </div>
+</div>
 <script>
   document.addEventListener("DOMContentLoaded", loadPosts);
 
@@ -69,3 +135,6 @@
     }
   }
 </script>
+
+</body>
+</html>
